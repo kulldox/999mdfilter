@@ -1,0 +1,71 @@
+﻿<link type="text/css" href="css/ui-darkness/jquery-ui-1.8.21.custom.css" rel="Stylesheet" />
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
+<style>
+li { width: 150px; margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+</style>
+<div class="toolstrip-button" style="color: #000000; font-family:'Arial'; -webkit-border-radius:10px;">
+  <span> <img src="img/999.png">Enchansements</span>
+  <h3> Currently in Ignore List <span id="totalItems"/></h3>
+  <div id="popupContent"></div>
+  <label for="exportContent">Data for export: </label><textarea id="exportContent"></textarea>
+</div>
+<script>
+	var loadedList;
+	var logLVL=0;
+	function gLSV(k){
+	  chrome.extension.sendRequest({method: "getLS", key: k}, function(response) {
+		var r = response, rd = r.data;
+		if( rd === '' || rd === null || typeof rd === 'undefined' ){
+		  logLVL === 1 && console.log('the value is `'+rd+'`' );
+		} else {
+		  logLVL === 1 && console.log('Got info from BG!',r);
+		}
+		logLVL === 1 && console.log('Getting ==>',r, rd);
+		if ( typeof rd === 'object' ) {
+		  loadedList=JSON.stringify(rd);
+		} else {
+		  loadedList=rd;
+		}
+	  });
+	}
+	function sLSV(k,v){
+	  chrome.extension.sendRequest({method: "setLS", key: k, value: v.replace(/\\"/g,'"')}, function(response) {
+		var r = response, rd = r.data;
+		logLVL === 1 && console.log('Setting ==>',r, rd);
+		if ( typeof rd === 'object' ) {
+		  loadedList=JSON.stringify(rd);
+		} else {
+		  loadedList=rd;
+		}
+	  });
+	}
+
+	gLSV("ignore_items");
+	
+
+	function GM_wait() {
+		var ignoreList=loadedList;
+		if ( typeof ignoreList === 'undefined') {
+			window.setTimeout(GM_wait, 100);
+		} else {
+			var ignoreList=JSON.parse(ignoreList);
+			var iList='';
+			$.each(ignoreList,function(k,v){
+				iList+='<li><span><a target="_blank"href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><a id="removeItem" class="ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only">-</a></li>';
+			});
+			$('#popupContent').append('<ul>'+iList+'</ul>');
+			$('#totalItems').text(ignoreList.length);
+			$('#exportContent').text(ignoreList);
+		}
+	}
+	GM_wait();
+			$('#removeItem').click(function(){
+				console.log(e, this, $(this).parent());
+			});
+			$('#removeItem').on('click',function(e){
+				console.log(e, this, $(this).parent());
+				$(this).parent().fadeOut();
+				return false;
+			});
+</script>

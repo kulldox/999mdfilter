@@ -1,0 +1,140 @@
+﻿<html>
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script>
+  var defaultSettings = {
+    cp_refreshonexit: 'true',
+	//ignore_items: { 'ignore_items':[12073773,12394784, 9817880, 7962319, 12107519, 11990543, 11731882, 8784410, 4865440, 11153528, 12364371, 12359982, 6761354, 12073586, 12363519, 8152097, 7988294, 9342983, 1239478]},
+	ignore_items: [12073773,12394784,9817880,7962319,12107519,11990543,11731882,8784410,4865440,11153528,12364371,12359982,6761354,12073586,12363519,8152097,7988294,9342983,1239478,11987097,12487486,11987056,12568125,12565295,7664646,3877779,7593180,2740781,11419150,10181361,10760009,9972359,9597429,9812451,9592785,3040458,9828177,12256460,6460112,11153728,8950377,12755079,12874632,12749232,12916488,12916047,10520383,12093086,4936518,9164066,12831646,6574405,7089227,12754421,10238427,7594478,5756996,5932099,12709929,2508996,11426147,12891345,2936196],
+	//ignore_items: [],
+    excludedUrls: "https://intranet.computaris.com/*\n"
+  };
+
+  //var getData = $.getJSON("list.json").pipe(function (ignore_items) {return ignore_items;});
+  //getData.done(function(ignore_items){defaultSettings.ignore_items = ignore_items});
+  //console.log('ignore_items: ' + defaultSettings.ignore_items);
+  
+  // Port handler mapping
+  var portHandlers = {
+    getCurrentTabUrl:     getCurrentTabUrl,
+    getSetting:           getSetting,
+    getBookmarks:         getBookmarks
+  };
+
+  var sendRequestHandlers = {
+    openOptionsPageInNewTab: openOptionsPageInNewTab,
+    copyToClipboard: copyToClipboard
+  };
+
+  /*
+   * Used by the content scripts to get settings from the local storage.
+   */
+  function getSetting(args, port) {
+    var value = getSettingFromLocalStorage(args.key);
+    var returnPort = chrome.tabs.connect(port.tab.id, { name: "getLS" });
+    returnPort.postMessage({ key: args.key, value: value });
+  }
+
+  function getBookmarks(args, port) {
+    chrome.bookmarks.search(args.query, function(bookmarks) {
+        port.postMessage({bookmarks:bookmarks})
+    })
+  }
+
+  /*
+   * Used by the content scripts to get their full URL. This is needed for URLs like "view-source:http:// .."
+   * because window.location doesn't know anything about the Chrome-specific "view-source:".
+   */
+  function getCurrentTabUrl(args, port) {
+    var returnPort = chrome.tabs.connect(port.tab.id, { name: "returnCurrentTabUrl" });
+    returnPort.postMessage({ url: port.tab.url });
+  }
+
+  /*
+   * Used by everyone to get settings from local storage.
+   */
+  function getSettingFromLocalStorage(setting) {
+    if (localStorage[setting] != "" && !localStorage[setting]) {
+      var lsval = defaultSettings[setting];
+      console.log(lsval,typeof lsval)
+      if ( typeof lsval === 'object' ) {
+        var lv = JSON.stringify(lsval);
+      } else {
+        var  lv = lsval;
+      }
+      localStorage[setting]=lv;
+      return lv;
+    } else {
+      var lsval = localStorage[setting];
+      if ( typeof lsval === 'object' ) {
+        return JSON.stringify(lsval);
+      } else {
+        return lsval;
+      }
+    }
+  }
+
+  function openOptionsPageInNewTab() {
+    chrome.tabs.getSelected(null, function(tab) {
+      chrome.tabs.create({ url: chrome.extension.getURL("options.html"), index: tab.index + 1 });
+    });
+  }
+
+  /*
+   * Copies some data (request.data) to the clipboard.
+   */
+  function copyToClipboard(request) {
+    Clipboard.copy(request.data);
+  }
+
+  chrome.extension.onConnect.addListener(function(port, name) {
+    var senderTabId = port.sender.tab ? port.sender.tab.id : null;
+
+    if (portHandlers[port.name])
+      port.onMessage.addListener(portHandlers[port.name]);
+
+  });
+
+
+  chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+    switch(request.method){
+      case "getLS":
+        var ls = getSettingFromLocalStorage(request.key);
+        sendResponse({data: ls});
+        console.log('BG: got GET request ',request);
+        console.log('BG: response ',ls);
+        break;
+      case "getDefLS":
+        var ls = defaultSettings[request.key];
+        sendResponse({data: ls});
+        console.log('BG: got GET request ',request);
+        console.log('BG: response ',ls);
+        break;
+      case "setLS":
+        console.log('BG: got SET request ',request);
+        localStorage.setItem(request.key,request.value);
+        var ls = getSettingFromLocalStorage(request.key);
+        console.log('BG: response ',ls);
+        sendResponse({data: ls});
+        break;
+      case "addLS":
+        console.log('BG: got ADD request ',request);
+		var tArr = JSON.parse(localStorage[request.key]);
+		tArr.push(parseInt(request.value));
+		console.log('added value ',request.value,'to tArr:', tArr);
+		localStorage[request.key]=JSON.stringify(tArr);
+        var ls = getSettingFromLocalStorage(request.key);
+        console.log('BG: response ',ls);
+        sendResponse({data: ls});
+        break;
+      default:
+        sendResponse({data: 'uknownRequest'}); // snub them.
+    }
+  });
+  
+  function init(){
+    //console.log(getSettingFromLocalStorage('cts_menu'));
+    //console.log(getSettingFromLocalStorage('cp_refreshonexit'));
+  }
+  init();
+</script>
+</html>

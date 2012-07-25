@@ -1,0 +1,27 @@
+{
+  "name": "999.md enchansements",
+  "version": "0.0.1",
+  "description": "999.md enchansements",
+  "content_scripts": [ {
+      "matches": ["http://*.999.md/*"],
+      "run_at": "document_end",
+      "css": ["css/ui-darkness/jquery-ui-1.8.21.custom.css"],
+      "js": [
+        "js/jquery-1.7.2.min.js",
+        "js/jquery-ui-1.8.21.custom.min.js",
+        "js/content.js"
+      ]
+  } ],
+  "background_page": "background.html",
+  "icons": { "128": "img/999.png" },
+  "browser_action": {
+    "default_title": "999.md enchansements",
+    "default_icon": "img/999.png",
+     "popup": "999_popup.html"
+ },
+  "permissions": [
+    "unlimited_storage",
+    "notifications",
+    "tabs"
+  ]
+}
