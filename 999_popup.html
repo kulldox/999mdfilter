@@ -2,17 +2,40 @@
 <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
 <style>
-li { width: 150px; margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+li { width: 150px; margin: 0; padding: 0.4em; }
+ul { margin: 0; padding: 0;}
+.removeItem { width: 16px; heigth: 16px; overflow: hidden;}
 </style>
-<div class="toolstrip-button" style="color: #000000; font-family:'Arial'; -webkit-border-radius:10px;">
-  <span> <img src="img/999.png">Enchansements</span>
-  <h3> Currently in Ignore List <span id="totalItems"/></h3>
-  <div id="popupContent"></div>
-  <label for="exportContent">Data for export: </label><textarea id="exportContent"></textarea>
+<div class="toolstrip-button" style="color: #000000; font-family:'Arial'; -webkit-border-radius:10px; width: 200px;">
+	<span> <img src="img/999.png">Enchansements</span>
+	<div class="ui-widget">
+		<div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
+			<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+			Currently in Ignore List <span id="totalItems"/></p>
+		</div>
+	</div>
+	<div id="popupContent"></div>
+	<div>
+		<label for="exportContent">Data for export: </label>
+		<textarea id="exportContent"></textarea>
+		<input type="button" id="importBtn" value="Import" class="ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only" />
+	</div>
 </div>
 <script>
-	var loadedList;
+if ( typeof Object.create !== 'function' ) {
+  Object.create = function( obj ) {
+    function F() {};
+    F.prototype = obj;
+    return new F();
+  };
+}
+
+(function( $, window, document, undefined ) {
+	var loadedList, ignoreList;
 	var logLVL=0;
+
+	var o = {};
+
 	function gLSV(k){
 	  chrome.extension.sendRequest({method: "getLS", key: k}, function(response) {
 		var r = response, rd = r.data;
@@ -23,9 +46,9 @@ li { width: 150px; margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; 
 		}
 		logLVL === 1 && console.log('Getting ==>',r, rd);
 		if ( typeof rd === 'object' ) {
-		  loadedList=JSON.stringify(rd);
+		  o.loadedList=JSON.stringify(rd);
 		} else {
-		  loadedList=rd;
+		  o.loadedList=rd;
 		}
 	  });
 	}
@@ -34,9 +57,9 @@ li { width: 150px; margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; 
 		var r = response, rd = r.data;
 		logLVL === 1 && console.log('Setting ==>',r, rd);
 		if ( typeof rd === 'object' ) {
-		  loadedList=JSON.stringify(rd);
+		  o.loadedList=JSON.stringify(rd);
 		} else {
-		  loadedList=rd;
+		  o.loadedList=rd;
 		}
 	  });
 	}
@@ -45,27 +68,41 @@ li { width: 150px; margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; 
 	
 
 	function GM_wait() {
-		var ignoreList=loadedList;
-		if ( typeof ignoreList === 'undefined') {
+		o.ignoreList=o.loadedList;
+		if ( typeof o.ignoreList === 'undefined') {
 			window.setTimeout(GM_wait, 100);
 		} else {
-			var ignoreList=JSON.parse(ignoreList);
+			o.ignoreList=JSON.parse(o.ignoreList);
 			var iList='';
-			$.each(ignoreList,function(k,v){
-				iList+='<li><span><a target="_blank"href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><a id="removeItem" class="ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only">-</a></li>';
+			$.each(o.ignoreList,function(k,v){
+				iList+='<li class="ui-widget-content"><span><a target="_blank"href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><span class="ui-state-default ui-corner-all" style="margin-left: 5px; display: inline-table;"><span ref="'+v+'" class="removeItem ui-icon ui-icon-circle-minus">-</span></span></li>';
 			});
-			$('#popupContent').append('<ul>'+iList+'</ul>');
-			$('#totalItems').text(ignoreList.length);
-			$('#exportContent').text(ignoreList);
+			$('#popupContent').append('<ul class="ui-widget">'+iList+'</ul>');
+			$('#totalItems').text(o.ignoreList.length);
+			$('#exportContent').text(o.ignoreList);
+			$('.removeItem').on('click',function(e){
+				e.preventDefault();
+				var 
+					$self = $(this),
+					self = this,
+					e
+				;
+				o.ignoreList.splice( $.inArray(parseInt($self.attr('ref')), o.ignoreList), 1);
+				sLSV("ignore_items",'['+o.ignoreList+']');
+				$self.parent().parent().fadeOut();
+			});
 		}
 	}
 	GM_wait();
-			$('#removeItem').click(function(){
-				console.log(e, this, $(this).parent());
-			});
-			$('#removeItem').on('click',function(e){
-				console.log(e, this, $(this).parent());
-				$(this).parent().fadeOut();
-				return false;
-			});
+
+	$('#importBtn').on('click',function(e){
+		e.preventDefault();
+		var ignoreListExp=$('#exportContent').val(),
+			$self = $(this),
+			self = this
+		;
+		sLSV("ignore_items",'['+ignoreListExp+']');
+	});
+	
+})( jQuery, window, document );
 </script>

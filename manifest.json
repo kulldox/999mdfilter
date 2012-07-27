@@ -1,6 +1,6 @@
 {
   "name": "999.md enchansements",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "999.md enchansements",
   "content_scripts": [ {
       "matches": ["http://*.999.md/*"],

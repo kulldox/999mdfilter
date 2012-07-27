@@ -1,6 +1,16 @@
 ﻿<html>
 <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
 <script>
+if ( typeof Object.create !== 'function' ) {
+  Object.create = function( obj ) {
+    function F() {};
+    F.prototype = obj;
+    return new F();
+  };
+}
+
+(function( $, window, document, undefined ) {
+
   var defaultSettings = {
     cp_refreshonexit: 'true',
 	//ignore_items: { 'ignore_items':[12073773,12394784, 9817880, 7962319, 12107519, 11990543, 11731882, 8784410, 4865440, 11153528, 12364371, 12359982, 6761354, 12073586, 12363519, 8152097, 7988294, 9342983, 1239478]},
@@ -136,5 +146,7 @@
     //console.log(getSettingFromLocalStorage('cp_refreshonexit'));
   }
   init();
+  
+ })( jQuery, window, document );
 </script>
 </html>
