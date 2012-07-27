@@ -37,21 +37,21 @@ if ( typeof Object.create !== 'function' ) {
 	var o = {};
 
 	function gLSV(k){
-	  chrome.extension.sendRequest({method: "getLS", key: k}, function(response) {
-		var r = response, rd = r.data;
-		if( rd === '' || rd === null || typeof rd === 'undefined' ){
-		  logLVL === 1 && console.log('the value is `'+rd+'`' );
-		} else {
-		  logLVL === 1 && console.log('Got info from BG!',r);
-		}
-		logLVL === 1 && console.log('Getting ==>',r, rd);
-		if ( typeof rd === 'object' ) {
-		  o.loadedList=JSON.stringify(rd);
-		} else {
-		  o.loadedList=rd;
-		}
-	  });
-  	$(document).trigger('varLoaded');
+		chrome.extension.sendRequest({method: "getLS", key: k}, function(response) {
+			var r = response, rd = r.data;
+			if( rd === '' || rd === null || typeof rd === 'undefined' ){
+				logLVL === 1 && console.log('the value is `'+rd+'`' );
+			} else {
+				logLVL === 1 && console.log('Got info from BG!',r);
+			}
+			logLVL === 1 && console.log('Getting ==>',r, rd);
+			if ( typeof rd === 'object' ) {
+				o.loadedList=JSON.stringify(rd);
+			} else {
+				o.loadedList=rd;
+			}
+			$(document).trigger('varLoaded');
+		});
 	}
 	function sLSV(k,v){
 	  chrome.extension.sendRequest({method: "setLS", key: k, value: v.replace(/\\"/g,'"')}, function(response) {
@@ -69,28 +69,24 @@ if ( typeof Object.create !== 'function' ) {
 	
 
   $(document).on('varLoaded', function (){ 
-		o.ignoreList=o.loadedList;
-		if ( ! typeof o.ignoreList === 'undefined') {
-			o.ignoreList=JSON.parse(o.ignoreList);
-			var iList='';
-			$.each(o.ignoreList,function(k,v){
-				iList+='<li class="ui-widget-content"><span><a target="_blank" href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><span class="ui-state-default ui-corner-all" style="margin-left: 5px; display: inline-table;"><span ref="'+v+'" class="removeItem ui-icon ui-icon-circle-minus">-</span></span></li>';
-			});
-			$('#popupContent').append('<ul class="ui-widget">'+iList+'</ul>');
-			$('#totalItems').text(o.ignoreList.length);
-			$('#exportContent').text(o.ignoreList);
-			$('.removeItem').on('click',function(e){
-				e.preventDefault();
-				var 
-					$self = $(this),
-					self = this,
-					e
-				;
-				o.ignoreList.splice( $.inArray(parseInt($self.attr('ref')), o.ignoreList), 1);
-				sLSV("ignore_items",'['+o.ignoreList+']');
-				$self.parent().parent().fadeOut();
-			});
-		}
+		o.ignoreList=JSON.parse(o.loadedList);
+		var iList='';
+		$.each(o.ignoreList,function(k,v){
+			iList+='<li class="ui-widget-content"><span><a target="_blank" href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><span class="ui-state-default ui-corner-all" style="margin-left: 5px; display: inline-table;"><span ref="'+v+'" class="removeItem ui-icon ui-icon-circle-minus">-</span></span></li>';
+		});
+		$('#popupContent').append('<ul class="ui-widget">'+iList+'</ul>');
+		$('#totalItems').text(o.ignoreList.length);
+		$('#exportContent').text(o.ignoreList);
+		$('.removeItem').on('click',function(e){
+			e.preventDefault();
+			var 
+				$self = $(this),
+				self = this
+			;
+			o.ignoreList.splice( $.inArray(parseInt($self.attr('ref')), o.ignoreList), 1);
+			sLSV("ignore_items",'['+o.ignoreList+']');
+			$self.parent().parent().fadeOut();
+		});
 	});
 
 	$('#importBtn').on('click',function(e){

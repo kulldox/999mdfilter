@@ -111,37 +111,34 @@ var
     cPage.head_style = cPage.head.find('style');
   }
 		
-      cPage.head_style.append(''+
-	  ".med_view .item:hover {"+
-	  "background: #cccccc;"+
-	  "}"+
-      '');
-	  gLSV(KEY_IGNORE_ITEMS);
-  if( /999.md/.test(cPage.loc) ) {
-    try {
-	  $(document).on('varLoaded', function (){ 
-		  var ignoreList=settings.getV(KEY_IGNORE_ITEMS),
-				itemsList=$('#boardItemList > div.item')
-			;
-			console.log('hurray!!! value loaded:' + ignoreList); 
-          if ( ! typeof ignoreList === 'undefined') {
-			var ignoreList=JSON.parse(ignoreList);
-			$('<a class="ignore ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only" title="Click to add it to ignore list">+</>').insertAfter(itemsList.find(' .text a.buy2'));
-			$.each(itemsList, function(i, v) {
-				v = v instanceof jQuery ? v: $(v);
-				!!~$.inArray(parseInt($('a[href*="MsgID="]', v).attr('href').split('=')[1]),ignoreList) && v.hide(); 
-			});			
-			$('.ignore').on('click',function(){ 
-				var currentItemID = $(this).parent().find('a.tit').attr('href').split('=')[1];
-				aLSV(KEY_IGNORE_ITEMS,currentItemID);
-				$(this).parent().parent().fadeOut();
-				//console.log(this,currentItemID); 
+	cPage.head_style.append(''+
+	".med_view .item:hover {"+
+	"background: #cccccc;"+
+	"}"+
+	'');
+	gLSV(KEY_IGNORE_ITEMS);
+	if( /999.md/.test(cPage.loc) ) {
+		try {
+			$(document).on('varLoaded', function (){ 
+				var ignoreList=settings.getV(KEY_IGNORE_ITEMS),
+					itemsList=$('#boardItemList > div.item')
+				;
+				var ignoreList=JSON.parse(ignoreList);
+				$('<a class="ignore ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only" title="Click to add it to ignore list">+</>').insertAfter(itemsList.find(' .text a.buy2'));
+				$.each(itemsList, function(i, v) {
+					v = v instanceof jQuery ? v: $(v);
+					!!~$.inArray(parseInt($('a[href*="MsgID="]', v).attr('href').split('=')[1]),ignoreList) && v.hide(); 
+				});			
+				$('.ignore').on('click',function(){ 
+					var currentItemID = $(this).parent().find('a.tit').attr('href').split('=')[1];
+					aLSV(KEY_IGNORE_ITEMS,currentItemID);
+					$(this).parent().parent().fadeOut();
+				});
 			});
-		});
-    } catch(e){
-      logLVL === 1 && console.debug('Unable to load 999md.',e,e.stack);
-    }
-  }
+		} catch(e){
+			logLVL === 1 && console.debug('Unable to load 999md.',e,e.stack);
+		}
+	}
   //---[ START: Options page communication ]---
   //TODO: options page
   //---[ END: Options page communication ]---
