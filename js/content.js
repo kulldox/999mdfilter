@@ -13,7 +13,6 @@ var settingPort,
     KEY_IGNORE_ITEMS = "ignore_items",
     logLVL = 0 // 0 - disabled; 1 - enabled
   ;
-//http*://*craigslist.org*
 // Content Local Storage for settings
 var settings = {
   values: {},
@@ -61,6 +60,7 @@ function gLSV(k){
     } else {
       settings.setV(k, rd);
     }
+	$(document).trigger('varLoaded');
   });
 }
 function gDLSV(k){
@@ -119,13 +119,12 @@ var
 	  gLSV(KEY_IGNORE_ITEMS);
   if( /999.md/.test(cPage.loc) ) {
     try {
-      function GM_wait() {
+	  $(document).on('varLoaded', function (){ 
 		  var ignoreList=settings.getV(KEY_IGNORE_ITEMS),
 				itemsList=$('#boardItemList > div.item')
 			;
-          if ( typeof ignoreList === 'undefined') {
-              window.setTimeout(GM_wait, 100);
-          } else {
+			console.log('hurray!!! value loaded:' + ignoreList); 
+          if ( ! typeof ignoreList === 'undefined') {
 			var ignoreList=JSON.parse(ignoreList);
 			$('<a class="ignore ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only" title="Click to add it to ignore list">+</>').insertAfter(itemsList.find(' .text a.buy2'));
 			$.each(itemsList, function(i, v) {
@@ -138,10 +137,7 @@ var
 				$(this).parent().parent().fadeOut();
 				//console.log(this,currentItemID); 
 			});
-			
-        }
-      }
-      GM_wait();
+		});
     } catch(e){
       logLVL === 1 && console.debug('Unable to load 999md.',e,e.stack);
     }
@@ -150,12 +146,5 @@ var
   //TODO: options page
   //---[ END: Options page communication ]---
   
-//------------------------------------------------------------------------------------------------------------------	
-//	END:	CONTROL PANEL
-//------------------------------------------------------------------------------------------------------------------	
-
-
-//---[ END:	That's all GM folks
-
 })( jQuery, window, document );
 

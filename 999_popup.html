@@ -32,7 +32,6 @@ if ( typeof Object.create !== 'function' ) {
 }
 
 (function( $, window, document, undefined ) {
-	var loadedList, ignoreList;
 	var logLVL=0;
 
 	var o = {};
@@ -52,6 +51,7 @@ if ( typeof Object.create !== 'function' ) {
 		  o.loadedList=rd;
 		}
 	  });
+  	$(document).trigger('varLoaded');
 	}
 	function sLSV(k,v){
 	  chrome.extension.sendRequest({method: "setLS", key: k, value: v.replace(/\\"/g,'"')}, function(response) {
@@ -68,11 +68,9 @@ if ( typeof Object.create !== 'function' ) {
 	gLSV("ignore_items");
 	
 
-	function GM_wait() {
+  $(document).on('varLoaded', function (){ 
 		o.ignoreList=o.loadedList;
-		if ( typeof o.ignoreList === 'undefined') {
-			window.setTimeout(GM_wait, 100);
-		} else {
+		if ( ! typeof o.ignoreList === 'undefined') {
 			o.ignoreList=JSON.parse(o.ignoreList);
 			var iList='';
 			$.each(o.ignoreList,function(k,v){
@@ -93,8 +91,7 @@ if ( typeof Object.create !== 'function' ) {
 				$self.parent().parent().fadeOut();
 			});
 		}
-	}
-	GM_wait();
+	});
 
 	$('#importBtn').on('click',function(e){
 		e.preventDefault();
