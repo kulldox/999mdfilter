@@ -20,6 +20,7 @@ ul { margin: 0; padding: 0;}
 		<textarea id="exportContent"></textarea>
 		<input type="button" id="importBtn" value="Import" class="ui-button ui-widget ui-state-hover ui-corner-all ui-button-text-only" />
 	</div>
+	<div><a href="https://github.com/kulldox/999mdfilter" target="_blank">project on github</a></div>
 </div>
 <script>
 if ( typeof Object.create !== 'function' ) {
@@ -75,7 +76,7 @@ if ( typeof Object.create !== 'function' ) {
 			o.ignoreList=JSON.parse(o.ignoreList);
 			var iList='';
 			$.each(o.ignoreList,function(k,v){
-				iList+='<li class="ui-widget-content"><span><a target="_blank"href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><span class="ui-state-default ui-corner-all" style="margin-left: 5px; display: inline-table;"><span ref="'+v+'" class="removeItem ui-icon ui-icon-circle-minus">-</span></span></li>';
+				iList+='<li class="ui-widget-content"><span><a target="_blank" href="http://999.md/Board/Message.aspx?MsgID='+v+'">'+v+'</a></span><span class="ui-state-default ui-corner-all" style="margin-left: 5px; display: inline-table;"><span ref="'+v+'" class="removeItem ui-icon ui-icon-circle-minus">-</span></span></li>';
 			});
 			$('#popupContent').append('<ul class="ui-widget">'+iList+'</ul>');
 			$('#totalItems').text(o.ignoreList.length);

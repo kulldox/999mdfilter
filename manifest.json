@@ -1,7 +1,7 @@
 {
   "name": "999.md enchansements",
   "version": "0.0.2",
-  "description": "999.md enchansements",
+  "description": "999.md enchansements, project on github: https://github.com/kulldox/999mdfilter",
   "content_scripts": [ {
       "matches": ["http://*.999.md/*"],
       "run_at": "document_end",
